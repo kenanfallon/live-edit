@@ -66,6 +66,7 @@
 	background: #fff;
 	z-index: 99998;
 	overflow: hidden;
+	-webkit-backface-visibility:hidden;
 }
 
 #live_edit-iframe-cover {
