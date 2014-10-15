@@ -4,37 +4,43 @@
 *
 *--------------------------------------------------------------------------------------------*/
 
-.live_edit-active {
-	box-shadow: 0 0 2px #2D90E5, inset 0 0 2px #2D90E5;
+html.live-edit-active {
+	overflow: hidden;	
 }
 
-.live_edit-edit-button {	
+html.live-edit-active body {
+	position: relative;	
+}
+
+.live-edit-enabled {
+	position: relative;
+}
+
+.live-edit-button {	
 	position: absolute;
 	top: 0;
 	right: 0;
 	
 	display: block;
-	background: url("../../../../wp-admin/images/white-grad.png") repeat-x scroll left top #F2F2F2;
-	box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+	
+	color: #555555;
+	font-size: 14px;
+	line-height: 1;
+	
+	padding: 9px 14px;
+	background: #F7F7F7;
+	border: #CCCCCC solid 1px;
 	border-radius: 3px;
-	border: #bbb solid 1px;
-	
-	color: #464646;
-	text-shadow: 0 1px 0 #FFFFFF;
-	font-size: 12px;
-	line-height: 12px;
-	padding: 4px 8px 5px;
-	
+	box-shadow: 0 1px 0 #FFFFFF inset, 0 1px 0 rgba(0, 0, 0, 0.08);
+		
 	cursor: pointer;
 	z-index: 9;
 }
 
-.live_edit-edit-button:hover {
-	border-color: #666;
-}
-
-.live_edit-enabled {
-	position: relative;
+.live-edit-button:hover {
+	background: #FAFAFA;
+	color: #222222;
+	border-collapse: #999999;
 }
 
 
@@ -44,32 +50,23 @@
 *
 *--------------------------------------------------------------------------------------------*/
 
-#live_edit-vail {
-	position: absolute;
-	z-index: 999;
-	
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	
-	display: none;
-}
-
-#live_edit-panel {
+#live-edit-panel {
 	width: 0px;
-	height: 100%;
-	
+	overflow: hidden;
 	position: fixed;
 	top: 0;
 	left: 0;
+	bottom: 0;
 	background: #fff;
 	z-index: 99998;
-	overflow: hidden;
-	-webkit-backface-visibility:hidden;
 }
 
-#live_edit-iframe-cover {
+html.live-edit-active #live-edit-panel {
+	overflow: visible;
+}
+
+
+#live-edit-iframe-cover {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -80,7 +77,7 @@
 	display: none;
 }
 
-#live_edit-iframe {
+#live-edit-iframe {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -88,22 +85,22 @@
 	max-width: inherit;
 	height: 100%;
 	z-index: 1;
-	box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2) inset;
 	background: #fff;
 	overflow: auto;
+	border: 0 none;
+	border-right: #777777 solid 1px;
 }
 
 
-.ui-resizable-handle { position: absolute;font-size: 0.1px; z-index: 99999; display: block;}
-.ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; cursor: default; }
-.ui-resizable-e { 
-	width: 3px;
+#live-edit-panel .ui-resizable-handle { position: absolute;font-size: 0.1px; z-index: 99999; display: block;}
+#live-edit-panel .ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; cursor: default; }
+#live-edit-panel .ui-resizable-e { 
+	width: 7px;
 	height: 100%;
 	position: absolute;
 	top: 0;
-	right: 0px;
-	border-right: #ccc solid 1px;
+	right: -3px;
 	z-index: 3;
 	
-	cursor: ew-resize;
+	cursor: ew-resize !important;
 }

@@ -1,248 +1,240 @@
-/*
-*  Live Edit
-*
-*  @description: 
-*  @created: 27/07/12
-*/
-	
+var live_edit;
+
+
 (function($){
-
-	/*
-	*  Exists
-	*  
-	*  @since			1.0.0
-	*  @description		returns true or false on a element's existance
-	*/
 	
-	$.fn.exists = function()
-	{
-		return $(this).length>0;
-	};
-	
-	
-	/*
-	*  uniqid
-	*  
-	*  @since			1.0.0
-	*  @description		Returns a unique ID (secconds of time)
-	*/
-	
-	function uniqid()
-   {
-    	var newDate = new Date();
-    	return newDate.getTime();
-    }
-	
-	
-	
-	/*
-	*  Click Edit
-	*
-	*  @description: 
-	*  @created: 6/09/12
-	*/
-	
-	$('.live_edit-edit-button').live('click', function(){
+	live_edit = {
 		
-		// vars
-		var button = $(this);
+		o : {},
 		
+		$el : null,
 		
-		// update live_Edit vars
-		live_edit.div = button.parent('.live_edit-enabled');
-		live_edit.fields = live_edit.div.attr('data-live_edit-fields');
-		live_edit.post_id = live_edit.div.attr('data-live_edit-post_id');
-		
-		
-		// open panel
-		live_edit.open_panel();
-		
-		
-		// set iframe url
-		$('#live_edit-iframe').attr('src', live_edit.panel_url + '&fields=' + live_edit.fields + '&post_id=' + live_edit.post_id);
-		
-		
-		return false;
-		
-	});
-	
-	
-	/*
-	*  Open Panel
-	*
-	*  @description: 
-	*  @created: 7/09/12
-	*/
-	
-	live_edit.open_panel = function()
-	{
-		// animate out panel
-		$('#live_edit-iframe').css({
-			width : live_edit.panel_width
-		});
-		
-		$('#live_edit-panel').animate({
-			width : live_edit.panel_width
-		}, 250, function(){
+		init : function(){
 			
-			$('#live_edit-iframe').css({
-				width : '100%'
-			});
+			// reference
+			var _this = this;
 			
-		});
-		
-		
-		// move across body
-		$('html').animate({
-			'margin-left' : live_edit.panel_width
-		}, 250);
-		
-		// disable resizable
-		$('#live_edit-panel').resizable("option", "disabled", false);
-	};
-	
-	
-	/*
-	*  close_panel
-	*
-	*  @description: 
-	*  @created: 7/09/12
-	*/
-	
-	live_edit.close_panel = function()
-	{
-		// animate away panel
-		$('#live_edit-iframe').css({
-			width : live_edit.panel_width
-		});
-		
-		$('#live_edit-panel').animate({
-			width : 0
-		}, 250 );
-		
-		
-		// move across body
-		$('html').animate({
-			'margin-left' : 0
-		}, 250);
-		
-		// disable resizable
-		$('#live_edit-panel').resizable("option", "disabled", true);
-	};
-	
-	
-	/*
-	*  add_edit_buttons
-	*
-	*  @description: 
-	*  @created: 7/09/12
-	*/
-	
-	function add_edit_buttons()
-	{
-		$('[data-live_edit-fields]').each(function(){
-			
-			//vars
-			var div = $(this);
-			
-			
-			// ignore if already setup
-			if( div.hasClass('live_edit-enabled') )
-			{
-				return;
-			}
-			
-			
-			// add class
-			$(this).addClass('live_edit-enabled');
-			
-			
-			// add button
-			div.prepend('<span class="live_edit-edit-button">Edit</span>');
-		});
-	};
-	
-	
-	/*
-	*  update_div
-	*
-	*  @description: 
-	*  @created: 8/09/12
-	*/
-	
-	live_edit.update_div = function(){
-
-		// add css to div
-		live_edit.div.append('<div class="live_edit-updating"></div>');
-		
-		
-		// fetch new div via ajax
-		var html = $('<div></div>');
-		
-		html.load( window.location + ' [data-live_edit-post_id="' + live_edit.post_id + '"][data-live_edit-fields="' + live_edit.fields + '"]', function(){
-			
-			var div = $( html.html() );
-			
-			live_edit.div.replaceWith( div );
-			
-			live_edit.div = div;
 			
 			// add buttons
-			add_edit_buttons();
+			this.add_buttons();
 			
-		});
+			
+			// resizable
+			$('#live-edit-panel').resizable({
+				handles : 'e',
+				start: function(event, ui){
+					$('#live-edit-iframe-cover').css({'display':'block'});
+				},
+				resize: function(event, ui){
+					$('body').css({
+						'left' : $('#live-edit-panel').width()
+					}, 250);
+				},
+				stop: function(event, ui){
+					$('#live-edit-iframe-cover').css({'display':'none'});
+					
+					var data = {
+						action	: 'live_edit_update_width',
+						width	: $('#live-edit-panel').width(),
+						nonce	: _this.o.nonce
+					};
+			
+					
+					$.post(_this.o.ajaxurl, data, function() {
+						// do nothing
+					});
+					
+					
+					// update local variable
+					_this.o.panel_width = data.panel_width;
+				}
+			});
+			
+			
+			// panel height
+			$('#live-edit-panel').css({
+				top : $('html').css('margin-top')
+			})
+			
+			// disable resizable
+			$('#live-edit-panel').resizable("option", "disabled", true);
+			
+			
+			// events
+			$(document).on('click', '.live-edit-button', function( e ){
+				
+				e.preventDefault();
+				
+				_this.click( $(this) );
+				
+			});
+			
+		},
 		
-
+		add_buttons : function(){
+			
+			$('[data-live-edit-id]').each(function(){
+			
+				//vars
+				var $el = $(this);
+				
+				
+				// ignore if already setup
+				if( $el.hasClass('live-edit-area') ) {
+				
+					return;
+					
+				}
+				
+				
+				// add class
+				$el.addClass('live-edit-area');
+				
+				
+				// add button
+				$el.prepend('<a href="#" class="live-edit-button">Edit</a>');
+				
+			});
+			
+		},
+		
+		click : function( $a ){
+			
+			// update $el
+			this.$el = $a.closest('.live-edit-area');
+			
+			
+			// update iframe
+			this.update_panel();
+			
+			
+			// open panel
+			this.open_panel();
+		},
+		
+		update_panel : function(){
+			
+			// vars
+			var fields = this.$el.attr('data-live-edit-fields'),
+				post_id = this.$el.attr('data-live-edit-post_id')
+			
+			
+			// update iframe
+			$('#live-edit-iframe').attr('src', this.o.panel_url + '&fields=' + fields + '&post_id=' + post_id + '&nonce=' + this.o.nonce);
+			
+		},
+		
+		open_panel : function(){
+			
+			// vars
+			var width = this.o.panel_width,
+				$panel = $('#live-edit-panel'),
+				$iframe = $('#live-edit-iframe');
+				
+				
+			// set ifram width
+			$iframe.css({
+				width : width
+			});
+			
+			
+			// animate
+			$panel.animate({
+				width : width
+			}, 250, function(){
+				
+				$iframe.css({
+					width : '100%'
+				});
+				
+			});
+			
+			
+			// move across body
+			$('html').addClass('live-edit-active');
+			$('body').animate({
+				'left' : width
+			}, 250);
+			
+			
+			// enable resizable
+			$panel.resizable("option", "disabled", false);
+		
+		},
+		
+		close_panel : function(){
+			
+			// vars
+			var width = this.o.panel_width,
+				$panel = $('#live-edit-panel'),
+				$iframe = $('#live-edit-iframe');
+				
+				
+			// set ifram width
+			$iframe.css({
+				width : width
+			});
+			
+			
+			// animate
+			$panel.animate({
+				width : 0
+			}, 250 );
+			
+			
+			// move across body
+			$('body').animate({
+				'left' : 0
+			}, 250, function(){
+				
+				$('html').removeClass('live-edit-active');
+				
+				$iframe.attr('src', '');
+				
+			});
+			
+			
+			// disable resizable
+			$panel.resizable("option", "disabled", true);
+			
+		},
+		
+		sync : function(){
+			
+			// reference
+			var _this = this;
+			
+			
+			// add css to div
+			this.$el.append('<div class="live-edit-loading"></div>');
+			
+			
+			// vars
+			var $loader = $('<div></div>');
+			
+			
+			// load
+			$loader.load( window.location + ' [data-live-edit-id="' + this.$el.attr('data-live-edit-id') + '"]', function(){
+				
+				_this.$el.removeClass('live-edit-area');
+				
+				_this.$el.html( $loader.children().html() );
+				
+				_this.add_buttons();
+				
+			});
+			
+							
+		}
+		
+		
 	};
-	
-	
-	/*
-	*  Document Ready
-	*  
-	*  @since			1.0.0
-	*  @description		Returns a unique ID (secconds of time)
-	*/
 	
 	$(document).ready(function(){
 		
-		// add buttons
-		add_edit_buttons();
-		
-		
-		// resizable
-		$('#live_edit-panel').resizable({
-			handles : 'e',
-			start: function(event, ui){
-				$('#live_edit-iframe-cover').css({'display':'block'});
-			},
-			resize: function(event, ui){
-				$('html').css({
-					'margin-left' : $('#live_edit-panel').width()
-				}, 250);
-			},
-			stop: function(event, ui){
-				$('#live_edit-iframe-cover').css({'display':'none'});
-				
-				var data = {
-					action	: 'live_edit_update_width',
-					panel_width	: $('#live_edit-panel').width()
-				};
-		
-				
-				$.post(live_edit.ajaxurl, data, function() {
-					// do nothing
-				});
-				
-				
-				// update local variable
-				live_edit.panel_width = data.panel_width;
-			}
-		});
-		
-		// disable resizable
-		$('#live_edit-panel').resizable("option", "disabled", true);
-	
+		live_edit.init();
 		
 	});
+	
 
 })(jQuery);
