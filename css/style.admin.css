@@ -111,6 +111,11 @@ body {
 	display: none;
 }
 
+.acf-form .le-user-error, .acf-form .le-user-avatar {
+	text-align:center;
+	margin:0 auto;
+}
+
 .acf-form .credits {
 	border-top: 1px solid #EEEEEE;
     color: #999999;

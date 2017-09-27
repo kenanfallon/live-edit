@@ -10,7 +10,6 @@ var live_edit;
 		$el : null,
 		
 		init : function(){
-			
 			// reference
 			var _this = this;
 			
@@ -67,6 +66,25 @@ var live_edit;
 				
 				_this.click( $(this) );
 				
+			});
+
+			// enable heartbeat
+
+			$(document).on( 'heartbeat-send.refresh-lock', function( e, data ) {
+				var lock = $("#live-edit-iframe").contents().find('#active_post_lock').val(),
+					post_id = $("#live-edit-iframe").contents().find('#post_ID').val(),
+					send = {};
+
+				if ( ! post_id === undefined )
+					return;
+
+				send.post_id = post_id;
+
+				if ( lock )
+					send.lock = lock;
+
+				data['wp-refresh-post-lock'] = send;
+
 			});
 			
 		},
@@ -163,18 +181,26 @@ var live_edit;
 		},
 		
 		close_panel : function(){
-			
+
+			$postID = $('#live-edit-iframe').contents().find('.acf-form #post_ID').val();
+			$userID = $('#live-edit-iframe').contents().find('.acf-form #user_ID').val();
+
+			var data = {
+				action	: 'live_edit_close_panel',
+				nonce	: live_edit.o.nonce,
+				postID: $postID,
+				userID: $userID
+			};
+
+			$.post(live_edit.o.ajaxurl, data, function(data) {
+				console.log(data);
+				// do nothing
+			});
+
 			// vars
 			var width = this.o.panel_width,
 				$panel = $('#live-edit-panel'),
 				$iframe = $('#live-edit-iframe');
-				
-				
-			// set ifram width
-			$iframe.css({
-				width : width
-			});
-			
 			
 			// animate
 			$panel.animate({
